@@ -17,7 +17,6 @@ pub fn to_clipboard(field: String) -> Result<()> {
         .context("Failed to open wl-copy stdin")?
         .write_all(field.as_bytes())?;
 
-    // 9. Optionally wait for clipboard copy to finish
     wl_copy.wait()?;
 
     Ok(())
