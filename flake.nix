@@ -51,8 +51,7 @@
         packages.default = wofi-1password;
 
         devShells.default = pkgs.mkShell {
-          inherit nativeBuildInputs;
-          buildInputs = buildInputs ++ [ pkgs._1password-cli ];
+          inherit nativeBuildInputs buildInputs;
           shellHook = ''
             exec fish
           '';
