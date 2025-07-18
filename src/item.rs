@@ -71,25 +71,23 @@ pub fn select_field_to_copy(
     item_description: &ItemDescription,
 ) -> Result<String> {
     let item = get_item_from_1password(session, item_description)?;
-    let labels_and_values = get_displayable_fields(&item)?;
+    let fields = item.fields.as_ref().context("Item has no fields")?;
+    let mut displayable_fields = get_displayable_fields(&fields);
+    sort_fields_by_priority(&mut displayable_fields);
+    let labels_and_values = get_field_table(&displayable_fields)?;
 
     let index = wofi::select("📋 Copy field", labels_and_values)?;
 
-    let selected_item = item
-        .fields
-        .unwrap_or_default()
-        .into_iter()
-        .filter(|f| f.value.is_some())
+    let selected_item = fields
+        .iter()
         .nth(index)
-        .and_then(|f| f.value)
+        .and_then(|f| f.value.clone())
         .context("No value found for selected field")?;
 
     Ok(selected_item)
 }
 
-fn get_displayable_fields(item: &Item) -> Result<Vec<[String; 2]>> {
-    let fields = item.fields.as_ref().context("Item has no fields")?;
-
+fn get_field_table(fields: &Vec<&Field>) -> Result<Vec<[String; 2]>> {
     let labels_and_values: Vec<[String; 2]> = fields
         .iter()
         .filter_map(|label_and_value| {
@@ -107,4 +105,20 @@ fn get_displayable_fields(item: &Item) -> Result<Vec<[String; 2]>> {
     }
 
     Ok(labels_and_values)
+}
+
+fn get_displayable_fields(fields: &Vec<Field>) -> Vec<&Field> {
+    fields.iter().filter(|f| f.value.is_some()).collect()
+}
+
+pub fn sort_fields_by_priority(fields: &mut Vec<&Field>) {
+    fn priority(purpose: Option<&str>) -> usize {
+        match purpose {
+            Some("PASSWORD") => 0,
+            Some("OTP") | Some("ONE_TIME_PASSWORD") => 1,
+            _ => 2,
+        }
+    }
+
+    fields.sort_by_key(|f| priority(f.purpose.as_deref()));
 }
