@@ -92,7 +92,7 @@ pub fn select_field_to_copy(
     let index = wofi::select("📋 Copy field", labels_and_values)?;
 
     let selected_item = displayed_fields
-        .iter()
+        .into_iter()
         .nth(index)
         .map(|displayed_field| displayed_field.value.clone())
         .context("No value found for selected field")?;
