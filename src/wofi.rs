@@ -27,15 +27,14 @@ pub fn select<const N: usize>(prompt: &str, entries: Vec<[String; N]>) -> Result
         return Err(anyhow::anyhow!("No entries to display"));
     }
 
-    // 1. Compute max width of each column
     let mut col_widths = [0usize; N];
     for row in &entries {
         for (i, col) in row.iter().enumerate() {
             col_widths[i] = col_widths[i].max(col.len());
         }
     }
+    let max_index_str_length = entries.len().to_string().len();
 
-    // 2. Format entries with padding
     let formatted_lines: Vec<String> = entries
         .iter()
         .enumerate()
@@ -45,11 +44,14 @@ pub fn select<const N: usize>(prompt: &str, entries: Vec<[String; N]>) -> Result
                 .enumerate()
                 .map(|(i, col)| format!("{:width$}", col, width = col_widths[i]))
                 .collect();
-            format!("{} ::index:{}", padded_cols.join("  |  "), index)
+            format!(
+                "{:max_index_str_length$} | {}",
+                index,
+                padded_cols.join(" | ")
+            )
         })
         .collect();
 
-    // 3. Launch wofi
     let mut child = Command::new("wofi")
         .args(["--dmenu", "--prompt", prompt])
         .stdin(Stdio::piped())
