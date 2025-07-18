@@ -80,8 +80,8 @@ pub fn select<const N: usize>(prompt: &str, entries: Vec<[String; N]>) -> Result
     }
 
     let index = selected
-        .rsplitn(2, "::index:")
-        .next()
+        .split_once("|")
+        .map(|(index, _)| index.trim())
         .and_then(|s| s.parse::<usize>().ok())
         .context("Failed to parse selected index")?;
 
