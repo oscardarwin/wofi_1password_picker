@@ -78,7 +78,7 @@ pub fn select_field_to_copy(
 
     let index = wofi::select("📋 Copy field", labels_and_values)?;
 
-    let selected_item = fields
+    let selected_item = displayable_fields
         .iter()
         .nth(index)
         .and_then(|f| f.value.clone())
