@@ -71,37 +71,40 @@ pub fn select_field_to_copy(
     item_description: &ItemDescription,
 ) -> Result<String> {
     let item = get_item_from_1password(session, item_description)?;
-    let (field_labels, field_values) = get_displayable_fields(&item)?;
+    let labels_and_values = get_displayable_fields(&item)?;
 
-    let rows: Vec<[String; 2]> = field_labels
-        .into_iter()
-        .zip(field_values)
-        .map(|(label, value)| [label, value])
-        .collect();
+    let index = wofi::select("📋 Copy field", labels_and_values)?;
 
-    let index = wofi::select("📋 Copy field", rows)?;
-    Ok(item
+    let selected_item = item
         .fields
         .unwrap_or_default()
         .into_iter()
         .filter(|f| f.value.is_some())
         .nth(index)
         .and_then(|f| f.value)
-        .context("No value found for selected field")?)
+        .context("No value found for selected field")?;
+
+    Ok(selected_item)
 }
 
-fn get_displayable_fields(item: &Item) -> Result<(Vec<String>, Vec<String>)> {
+fn get_displayable_fields(item: &Item) -> Result<Vec<[String; 2]>> {
     let fields = item.fields.as_ref().context("Item has no fields")?;
 
-    let labels_and_values: Vec<_> = fields
+    let labels_and_values: Vec<[String; 2]> = fields
         .iter()
-        .filter_map(|f| f.value.as_ref().map(|v| (f.label.clone(), v.clone())))
+        .filter_map(|label_and_value| {
+            let label = label_and_value.label.clone();
+            let display_value = match label_and_value.purpose.as_deref() {
+                Some("PASSWORD") => Some("********".to_string()),
+                _ => label_and_value.value.clone(),
+            }?;
+            Some([label, display_value])
+        })
         .collect();
 
     if labels_and_values.is_empty() {
         return Err(anyhow::anyhow!("No fields with values found"));
     }
 
-    let (labels, values): (Vec<_>, Vec<_>) = labels_and_values.into_iter().unzip();
-    Ok((labels, values))
+    Ok(labels_and_values)
 }
