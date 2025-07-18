@@ -7,8 +7,7 @@ mod item;
 mod item_description;
 mod session;
 mod wl_copy;
-mod wofi_message;
-mod wofi_select;
+mod wofi;
 
 fn main() -> Result<()> {
     let session = get_op_session_from_systemd()?;

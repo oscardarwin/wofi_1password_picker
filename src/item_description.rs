@@ -3,7 +3,7 @@ use std::process::Command;
 
 use serde::Deserialize;
 
-use crate::{session::Session, wofi_message::wofi_message, wofi_select::wofi_select_table};
+use crate::{session::Session, wofi};
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct ItemDescription {
@@ -39,7 +39,7 @@ fn get_item_descriptions(session: &Session) -> Result<Vec<ItemDescription>> {
     let stdout = String::from_utf8(item_list.stdout)?;
     if stdout.trim().is_empty() {
         let message = "No 1Password items found.\n\nCheck your vault or sign-in status.";
-        wofi_message("🔍 No Items", &message)?;
+        wofi::message("🔍 No Items", &message)?;
         return Err(anyhow::anyhow!(message));
     }
 
@@ -64,7 +64,7 @@ pub fn select_item_description(session: &Session) -> Result<ItemDescription> {
         })
         .collect();
 
-    let index = wofi_select_table("🔐 1Password", "Select login", rows)?;
+    let index = wofi::select("🔐 Select login", rows)?;
     item_descriptions
         .get(index)
         .cloned()

@@ -3,7 +3,7 @@ use std::process::Command;
 use anyhow::{Context, Result};
 use serde::Deserialize;
 
-use crate::{item_description::ItemDescription, session::Session, wofi_select::wofi_select_table};
+use crate::{item_description::ItemDescription, session::Session, wofi};
 
 #[derive(Debug, Deserialize)]
 pub struct Item {
@@ -79,7 +79,7 @@ pub fn select_field_to_copy(
         .map(|(label, value)| [label, value])
         .collect();
 
-    let index = wofi_select_table("📋 Copy field", "Choose a field", rows)?;
+    let index = wofi::select("📋 Copy field", rows)?;
     Ok(item
         .fields
         .unwrap_or_default()

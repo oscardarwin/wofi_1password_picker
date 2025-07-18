@@ -2,7 +2,7 @@ use std::process::Command;
 
 use anyhow::{Context, Result};
 
-use crate::wofi_message::wofi_message;
+use crate::wofi::message;
 
 pub type Session = String;
 
@@ -30,7 +30,7 @@ pub fn get_op_session_from_systemd() -> Result<Session> {
         }
     }
 
-    wofi_message(
+    message(
         "🔐 Not signed in to 1Password",
         "Please run `op signin` in a terminal or the 1Password GUI.\n\nThis launcher requires an active OP_SESSION variable.",
     )?;
