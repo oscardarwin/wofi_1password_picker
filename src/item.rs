@@ -28,7 +28,8 @@ pub struct Vault {
 
 #[derive(Debug, Deserialize)]
 pub struct Url {
-    pub primary: bool,
+    pub label: Option<String>,
+    pub primary: Option<bool>,
     pub href: String,
 }
 
